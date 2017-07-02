@@ -1,7 +1,6 @@
 import unittest
 
-from sample import main
-
+import main
 
 class Tests(unittest.TestCase):
     def prepare(self, line):
@@ -53,7 +52,6 @@ class Tests(unittest.TestCase):
         self.assertTrue(main.fit(comb))
         comb = [0, 1, 2, 3, 8]
         self.assertFalse(main.fit(comb))
-
 
 if __name__ == '__main__':
     unittest.main()

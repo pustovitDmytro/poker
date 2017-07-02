@@ -1,9 +1,63 @@
 # -*- coding: utf-8 -*-
 import sys
+
 #C=Clubs, D=Diamonds, H=Hearts, S=Spades
 SUITS = ["C","D","H","S"]
 #A=Ace, 2-9, T=10, J=Jack, Q=Queen, K=King
 FACES = range(2,15)
+
+def getLineFromFile(way,pos=0):
+    """Reads from file"""
+    if way==sys.stdin:
+        line = sys.stdin.readline()
+        if len(line)<2:
+            return(-1,line)
+        return(0,line)
+    f = open(way,'rU')
+    f.seek(pos)
+    line = f.readline()
+    nextPos = f.tell()
+    if not line: nextPos = -1
+    f.close()
+    return(nextPos,line)
+
+def putLineToFile(way,line):
+    """Writes to File"""
+    if way==sys.stdout:
+        sys.stdout.write(line)
+        return
+    f = open(way,'a')
+    f.writelines(line)
+    f.close()
+
+def clearFile(way):
+    """Removes file content"""
+    if way==sys.stdout:
+        return
+    f = open(way, 'w')
+    f.truncate(0)
+    f.close()
+
+def createOutLine(list,message):
+    """makes result string"""
+    outline = "Hand: "
+    for i in range(5):
+        outline += list[i] + " "
+    outline += "Deck: "
+    for i in range(5, 10):
+        outline += list[i] + " "
+    outline += "Best hand: "
+    outline += message + '\n'
+    return outline
+
+def strToCard(str,position):
+    """Transforms string to object"""
+    obj = {
+        'face':faceToInt(str[0]),
+        'suit':str[1],
+        'position':position
+    }
+    return obj
 
 def faceToInt(face):
     """Transforms str-like face to int"""
@@ -18,6 +72,20 @@ def faceToInt(face):
     elif face=="T":
         return 10
     else: return int(face)
+
+def combToInt(combination):
+    """Transforms combination from dictionary-list to int-list"""
+    return [item['position'] for item in combination]
+
+def straight_flush(cards):
+    """returns true if cards match straight and flush rule and false otherwise"""
+    for suit in SUITS:
+        suited = list(filter(lambda x: x['suit']==suit,cards))
+        if len(suited)>4:
+            result = straight(suited)
+            if result:
+                return True
+    return False
 
 def straight(cards):
     """returns true if cards match straight rule and false otherwise"""
@@ -41,16 +109,6 @@ def straight(cards):
         if len(combination)>=5:
             combination = sorted(combination,key=lambda x: x['position'])
             result = fit(combToInt(combination[:5]))
-            if result:
-                return True
-    return False
-
-def straight_flush(cards):
-    """returns true if cards match straight and flush rule and false otherwise"""
-    for suit in SUITS:
-        suited = list(filter(lambda x: x['suit']==suit,cards))
-        if len(suited)>4:
-            result = straight(suited)
             if result:
                 return True
     return False
@@ -128,62 +186,6 @@ def fit(comb):
     else:
         return False
 
-def combToInt(combination):
-    """Transforms combination from dictionary-list to int-list"""
-    return [item['position'] for item in combination]
-
-def getLineFromFile(way,pos=0):
-    """Reads from file"""
-    if way==sys.stdin:
-        line = sys.stdin.readline()
-        if not line:
-            return(-1,line)
-        return(0,line)
-    f = open(way,'rU')
-    f.seek(pos)
-    line = f.readline()
-    nextPos = f.tell()
-    if not line: nextPos = -1
-    f.close()
-    return(nextPos,line)
-
-def putLineToFile(way,line):
-    """Writes to File"""
-    if way==sys.stdout:
-        sys.stdout.write(line)
-        return
-    f = open(way,'a')
-    f.writelines(line)
-    f.close()
-def clearFile(way):
-    """Removes file content"""
-    if way==sys.stdout:
-        return
-    f = open(way, 'w')
-    f.truncate(0)
-    f.close()
-
-def createOutLine(list,message):
-    """makes result string"""
-    outline = "Hand: "
-    for i in range(5):
-        outline += list[i] + " "
-    outline += "Deck: "
-    for i in range(5, 10):
-        outline += list[i] + " "
-    outline += "Best hand: "
-    outline += message + '\n'
-    return outline
-
-def strToCard(str,position):
-    """Transforms string to object"""
-    obj = {
-        'face':faceToInt(str[0]),
-        'suit':str[1],
-        'position':position
-    }
-    return obj
-
 def start(inp,out):
     position=0
     clearFile(out)
@@ -249,7 +251,6 @@ def start(inp,out):
                 break
         outline = createOutLine(strCards,message)
         putLineToFile(out,outline)
-
 
 def main():
     if len(sys.argv) > 2:
